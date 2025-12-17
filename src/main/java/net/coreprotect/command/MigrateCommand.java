@@ -266,15 +266,15 @@ public class MigrateCommand extends Consumer {
         ResultSetMetaData metaData = rs.getMetaData();
         int columnCount = metaData.getColumnCount();
 
-        // Build column list (skip rowid for H2 as it uses IDENTITY)
+        // Build column list (skip rowid/id for H2 as it uses IDENTITY)
         StringBuilder columns = new StringBuilder();
         StringBuilder placeholders = new StringBuilder();
         int startColumn = 1;
 
-        // For H2 target, skip rowid column if it exists (IDENTITY auto-generates)
+        // For H2 target, skip rowid or id column if it exists (IDENTITY auto-generates)
         if (targetType.equals("h2")) {
             String firstColumn = metaData.getColumnName(1).toLowerCase();
-            if (firstColumn.equals("rowid")) {
+            if (firstColumn.equals("rowid") || firstColumn.equals("id")) {
                 startColumn = 2;
             }
         }

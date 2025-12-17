@@ -696,7 +696,7 @@ public class Database extends Queue {
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + prefix + "database_lock (rowid IDENTITY, status INT, time INT)");
         }
         if (!tableData.contains(prefix.toLowerCase() + "entity")) {
-            statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + prefix + "entity (rowid IDENTITY, time INT, data BLOB)");
+            statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + prefix + "entity (id IDENTITY, time INT, data BLOB)");
         }
         if (!tableData.contains(prefix.toLowerCase() + "entity_map")) {
             statement.executeUpdate("CREATE TABLE IF NOT EXISTS " + prefix + "entity_map (rowid IDENTITY, id INT, entity VARCHAR(255))");
