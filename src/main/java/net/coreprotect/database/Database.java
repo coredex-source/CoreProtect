@@ -279,6 +279,17 @@ public class Database extends Queue {
     private static void initializeTables(String prefix, Statement statement) {
         try {
             if (!Config.getGlobal().MYSQL) {
+                // Set page size before other PRAGMA statements (only effective on new databases)
+                int pageSize = Config.getGlobal().SQLITE_PAGE_SIZE;
+                if (pageSize != 4096) {
+                    statement.executeUpdate("PRAGMA page_size=" + pageSize + ";");
+                }
+
+                // Auto vacuum setting - reduces file size by ~10-25% by reclaiming unused space
+                if (Config.getGlobal().SQLITE_AUTO_VACUUM) {
+                    statement.executeUpdate("PRAGMA auto_vacuum=FULL;");
+                }
+
                 if (!Config.getGlobal().DISABLE_WAL) {
                     statement.executeUpdate("PRAGMA journal_mode=WAL;");
                 }

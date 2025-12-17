@@ -42,6 +42,8 @@ public class Config extends Language {
     public String LANGUAGE;
     public boolean ENABLE_SSL;
     public boolean DISABLE_WAL;
+    public boolean SQLITE_AUTO_VACUUM;
+    public int SQLITE_PAGE_SIZE;
     public boolean HOVER_EVENTS;
     public boolean DATABASE_LOCK;
     public boolean LOG_CANCELLED_CHAT;
@@ -141,6 +143,8 @@ public class Config extends Language {
         DEFAULT_VALUES.put("player-sessions", "true");
         DEFAULT_VALUES.put("username-changes", "true");
         DEFAULT_VALUES.put("worldedit", "true");
+        DEFAULT_VALUES.put("sqlite-auto-vacuum", "false");
+        DEFAULT_VALUES.put("sqlite-page-size", "4096");
 
         HEADERS.put("donation-key", new String[] { "# CoreProtect is donationware. Obtain a donation key from coreprotect.net/donate/" });
         HEADERS.put("use-mysql", new String[] { "# MySQL is optional and not required.", "# If you prefer to use MySQL, enable the following and fill out the fields." });
@@ -184,11 +188,15 @@ public class Config extends Language {
         HEADERS.put("player-sessions", new String[] { "# Logs the logins and logouts of players." });
         HEADERS.put("username-changes", new String[] { "# Logs when a player changes their Minecraft username." });
         HEADERS.put("worldedit", new String[] { "# Logs changes made via the plugin \"WorldEdit\" if it's in use on your server." });
+        HEADERS.put("sqlite-auto-vacuum", new String[] { "# SQLite disk space optimization options below. Only applicable when using SQLite.", "# If enabled, automatically reclaims unused space to reduce database file size.", "# May reduce file size by approximately 10-25% but slightly impacts write performance." });
+        HEADERS.put("sqlite-page-size", new String[] { "# SQLite page size in bytes. Valid values: 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536.", "# Smaller values (1024-2048) may reduce file size by 5-15% for databases with small records.", "# Larger values (8192-16384) improve performance for large BLOB data. Default: 4096." });
     }
 
     private void readValues() {
         this.ENABLE_SSL = this.getBoolean("enable-ssl", false);
         this.DISABLE_WAL = this.getBoolean("disable-wal", false);
+        this.SQLITE_AUTO_VACUUM = this.getBoolean("sqlite-auto-vacuum", false);
+        this.SQLITE_PAGE_SIZE = this.getValidPageSize(this.getInt("sqlite-page-size", 4096));
         this.HOVER_EVENTS = this.getBoolean("hover-events", true);
         this.DATABASE_LOCK = this.getBoolean("database-lock", true);
         this.LOG_CANCELLED_CHAT = this.getBoolean("log-cancelled-chat", true);
@@ -323,6 +331,17 @@ public class Config extends Language {
     private String getString(final String key) {
         final String configured = this.get(key, null);
         return configured == null ? "" : configured;
+    }
+
+    private int getValidPageSize(int pageSize) {
+        // Valid SQLite page sizes: 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536
+        int[] validSizes = { 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536 };
+        for (int size : validSizes) {
+            if (pageSize == size) {
+                return pageSize;
+            }
+        }
+        return 4096; // Default to 4096 if invalid
     }
 
     public void clearConfig() {
